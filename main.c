@@ -32,7 +32,6 @@ void execute_command(char *command)
             return;
         }
 
-        // Removed this line to prevent extra output
         /* if (WIFEXITED(status))
         {
             printf("Child exited with status %d\n", WEXITSTATUS(status));
