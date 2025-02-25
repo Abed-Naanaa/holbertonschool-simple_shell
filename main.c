@@ -32,14 +32,15 @@ void execute_command(char *command)
             return;
         }
 
-        if (WIFEXITED(status))
+        // Removed this line to prevent extra output
+        /* if (WIFEXITED(status))
         {
             printf("Child exited with status %d\n", WEXITSTATUS(status));
         }
         else if (WIFSIGNALED(status))
         {
             printf("Child terminated by signal %d\n", WTERMSIG(status));
-        }
+        } */
     }
 }
 
