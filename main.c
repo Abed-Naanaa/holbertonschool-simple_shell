@@ -1,60 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
 #include "shell.h"
+
+void prompt(void)
+{
+    printf("($) ");
+}
 
 void execute_command(char *command)
 {
-	pid_t pid;
-	int status;
-	char *argv[2];
+    pid_t pid = fork();
 
-	argv[0] = command;
-	argv[1] = NULL;
-
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("Error");
-		return;
-	}
-
-	if (pid == 0)
-	{
-		if (execve(command, argv, environ) == -1)
-		{
-			perror("./hsh");
-			exit(127);
-		}
-	}
-	else
-		waitpid(pid, &status, 0);
+    if (pid == -1) {
+        perror("fork failed");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        char *args[] = {command, NULL};
+        execvp(args[0], args);
+        perror("execvp failed");
+        exit(EXIT_FAILURE);
+    } else {
+        wait(NULL);
+    }
 }
 
 int main(void)
 {
-	char *input = NULL;
-	size_t len = 0;
-	ssize_t read;
+    char buffer[BUFFER_SIZE];
 
-	while (1)
-	{
-		if (isatty(STDIN_FILENO))
-		{
-			printf("#cisfun$ ");
-			fflush(stdout);
-		}
+    while (1) {
+        prompt();
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            if (feof(stdin)) {
+                break;
+            } else {
+                perror("fgets failed");
+                continue;
+            }
+        }
 
-		read = getline(&input, &len, stdin);
-		if (read == -1)
-		{
-			if (isatty(STDIN_FILENO))
-				printf("\n");
-			break;
-		}
+        buffer[strcspn(buffer, "\n")] = 0;
 
-		input[strcspn(input, "\n")] = '\0';
-		execute_command(input);
-	}
+        if (strlen(buffer) == 0) {
+            continue;
+        }
 
-	free(input);
-	return (0);
+        if (strcmp(buffer, "exit") == 0) {
+            break;
+        }
+
+        execute_command(buffer);
+    }
+
+    return 0;
 }
-
