@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+/* Declare environ */
+extern char **environ;
+
 #define MAX_INPUT_SIZE 1024
 
 /**
@@ -85,4 +88,5 @@ int main(void)
         }
     }
 
-    return (0);}
+    return (0);
+}
