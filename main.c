@@ -1,52 +1,55 @@
-#include <main.h>
+#include "shell.h"
 
-int main(int argc, char **argv)
+void execute_command(char *command)
 {
-        (void)argc, (void)argv;
-        char *buf = NULL;
-        size_t count = 0;
-        ssize_t nread;
-        pid_t child_pid;
-        int status;
+	pid_t pid;
+	int status;
+	char *argv[2];
 
-        while (1)
-        {
-                write(STDOUT_FILENO, "MyShell$ ", 9);
+	argv[0] = command;
+	argv[1] = NULL;
 
-                nread = getline(&buf, &count, stdin);
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("Error");
+		return;
+	}
 
-                if (nread ==  -1)
-                {
-                        perror("Exiting shell");
-                        exit(1);
-                }
+	if (pid == 0)
+	{
+		if (execve(command, argv, environ) == -1)
+		{
+			perror("./shell");
+			exit(127);
+		}
+	}
+	else
+		waitpid(pid, &status, 0);
+}
 
-                child_pid = fork();
+int main(void)
+{
+	char *input = NULL;
+	size_t len = 0;
+	ssize_t read;
 
-                if (child_pid == -1)
-                {
-                        perror("Failed to create.");
-                        exit (41);
-                }
+	while (1)
+	{
+		printf("#cisfun$ ");
+		fflush(stdout);
 
-                if (child_pid == 0)
-                {
-                        /* The creation was successful and we can execute the user input */
-if (execve(array[0], array, NULL) == -1)
-           {
-                   perror("Couldn't execute");
-                   exit(7);
-           }
+		read = getline(&input, &len, stdin);
+		if (read == -1)
+		{
+			printf("\n");
+			break;
+		}
 
+		input[strcspn(input, "\n")] = '\0';
+		execute_command(input);
+	}
 
-                        printf("The creation was successful\n");
-                }
-                else
-                {
-                        /* Wait for the child process to execute before terminating the parent process */
-                        wait(&status);
-                }
-        }
-        free(buf);
-        return (0);
+	free(input);
+	return (0);
 }
