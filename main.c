@@ -1,92 +1,59 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
+#include "shell.h"
 
-/* Declare environ */
-extern char **environ;
-
-#define MAX_INPUT_SIZE 1024
-
-/**
- * display_prompt - Displays the shell prompt.
- */
-void display_prompt(void)
+void execute_command(char *command)
 {
-    printf("#cisfun$ ");
-    fflush(stdout);
+	pid_t pid;
+	int status;
+	char *argv[2];
+
+	argv[0] = command;
+	argv[1] = NULL;
+
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("Error");
+		return;
+	}
+
+	if (pid == 0)
+	{
+		if (execve(command, argv, environ) == -1)
+		{
+			perror("./hsh");
+			exit(127);
+		}
+	}
+	else
+		waitpid(pid, &status, 0);
 }
 
-/**
- * execute_command - Executes a command using execve.
- * @command: The command to execute.
- *
- * Return: 0 on success, -1 on failure.
- */
-int execute_command(char *command)
-{
-    pid_t pid;
-    int status;
-
-    pid = fork();
-    if (pid == -1)
-    {
-        perror("fork");
-        return (-1);
-    }
-
-    if (pid == 0) /* Child process */
-    {
-        if (execve(command, NULL, environ) == -1)
-        {
-            perror(command);
-            exit(EXIT_FAILURE);
-        }
-    }
-    else /* Parent process */
-    {
-        wait(&status);
-    }
-
-    return (0);
-}
-
-/**
- * main - Entry point of the shell program.
- *
- * Return: Always 0.
- */
 int main(void)
 {
-    char input[MAX_INPUT_SIZE];
+	char *input = NULL;
+	size_t len = 0;
+	ssize_t read;
 
-    while (1)
-    {
-        display_prompt();
+	while (1)
+	{
+		if (isatty(STDIN_FILENO))
+		{
+			printf("#cisfun$ ");
+			fflush(stdout);
+		}
 
-        if (fgets(input, MAX_INPUT_SIZE, stdin) == NULL)
-        {
-            /* Handle EOF (Ctrl+D) */
-            printf("\n");
-            break;
-        }
+		read = getline(&input, &len, stdin);
+		if (read == -1)
+		{
+			if (isatty(STDIN_FILENO))
+				printf("\n");
+			break;
+		}
 
-        /* Remove the newline character from the input */
-        input[strcspn(input, "\n")] = '\0';
+		input[strcspn(input, "\n")] = '\0';
+		execute_command(input);
+	}
 
-        if (strlen(input) == 0)
-        {
-            /* Empty input, just display the prompt again */
-            continue;
-        }
-
-        /* Execute the command */
-        if (execute_command(input) == -1)
-        {
-            /* Error message is already printed by execute_command */
-        }
-    }
-
-    return (0);
+	free(input);
+	return (0);
 }
