@@ -1,59 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/wait.h>
-#include "shell.h"
+#include "simple_shell.h"
 
-void prompt(void)
-{
-    printf("($) ");
-}
-
-void execute_command(char *command)
-{
+void execute_command(char *command) {
     pid_t pid = fork();
-
+    
     if (pid == -1) {
-        perror("fork failed");
-        exit(EXIT_FAILURE);
-    } else if (pid == 0) {
+        perror("Fork failed");
+        exit(1);
+    }
+
+    if (pid == 0) {
         char *args[] = {command, NULL};
-        execvp(args[0], args);
-        perror("execvp failed");
-        exit(EXIT_FAILURE);
+        if (execve(command, args, NULL) == -1) {
+            perror(command);
+            exit(1);
+        }
     } else {
         wait(NULL);
     }
 }
 
-int main(void)
-{
-    char buffer[BUFFER_SIZE];
+int main(void) {
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
 
     while (1) {
-        prompt();
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
-            if (feof(stdin)) {
-                break;
-            } else {
-                perror("fgets failed");
-                continue;
-            }
+        printf(PROMPT);
+        read = getline(&line, &len, stdin);
+
+        if (read == -1) {
+            free(line);
+            exit(0);
         }
 
-        buffer[strcspn(buffer, "\n")] = 0;
-
-        if (strlen(buffer) == 0) {
-            continue;
+        if (line[read - 1] == '\n') {
+            line[read - 1] = '\0';
         }
 
-        if (strcmp(buffer, "exit") == 0) {
-            break;
-        }
-
-        execute_command(buffer);
+        execute_command(line);
     }
 
+    free(line);
     return 0;
 }

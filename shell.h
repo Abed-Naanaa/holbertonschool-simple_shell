@@ -1,9 +1,8 @@
-#ifndef SHELL_H
-#define SHELL_H
+#ifndef SIMPLE_SHELL_H
+#define SIMPLE_SHELL_H
 
-#define BUFFER_SIZE 1024
+#define PROMPT "#cisfun$ "
 
-void prompt(void);
 void execute_command(char *command);
 
-#endif /* SHELL_H */
+#endif /* SIMPLE_SHELL_H */
