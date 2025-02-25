@@ -7,9 +7,10 @@ void execute_command(char *command)
     pid_t pid;
     int status;
     char *argv[2];
+    char *end;
 
     while (isspace((unsigned char)*command)) command++;
-    char *end = command + strlen(command) - 1;
+    end = command + strlen(command) - 1;
     while (end > command && isspace((unsigned char)*end)) end--;
     *(end + 1) = '\0';
 
