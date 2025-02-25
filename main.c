@@ -20,7 +20,7 @@ void execute_command(char *command)
 	{
 		if (execve(command, argv, environ) == -1)
 		{
-			perror("./shell");
+			perror("./hsh");
 			exit(127);
 		}
 	}
@@ -36,13 +36,17 @@ int main(void)
 
 	while (1)
 	{
-		printf("#cisfun$ ");
-		fflush(stdout);
+		if (isatty(STDIN_FILENO))
+		{
+			printf("#cisfun$ ");
+			fflush(stdout);
+		}
 
 		read = getline(&input, &len, stdin);
 		if (read == -1)
 		{
-			printf("\n");
+			if (isatty(STDIN_FILENO))
+				printf("\n");
 			break;
 		}
 
