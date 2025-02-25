@@ -1,10 +1,23 @@
 #include "shell.h"
+#include <string.h>
+#include <ctype.h>
 
 void execute_command(char *command)
 {
     pid_t pid;
     int status;
     char *argv[2];
+
+    while (isspace((unsigned char)*command)) command++;
+    char *end = command + strlen(command) - 1;
+    while (end > command && isspace((unsigned char)*end)) end--;
+    *(end + 1) = '\0';
+
+    if (strlen(command) == 0)
+    {
+        printf("Error: Empty command\n");
+        return;
+    }
 
     argv[0] = command;
     argv[1] = NULL;
@@ -31,15 +44,6 @@ void execute_command(char *command)
             perror("Error: waitpid failed");
             return;
         }
-
-        /* if (WIFEXITED(status))
-        {
-            printf("Child exited with status %d\n", WEXITSTATUS(status));
-        }
-        else if (WIFSIGNALED(status))
-        {
-            printf("Child terminated by signal %d\n", WTERMSIG(status));
-        } */
     }
 }
 
