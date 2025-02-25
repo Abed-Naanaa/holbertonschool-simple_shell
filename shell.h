@@ -11,5 +11,7 @@
 extern char **environ;
 
 void execute_command(char *command);
+void display_prompt(void);
+char *trim_whitespace(char *str);
 
 #endif
