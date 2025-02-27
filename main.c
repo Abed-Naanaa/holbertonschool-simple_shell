@@ -9,7 +9,7 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
-extern char *environ;  /* The global environment variable */
+extern char **environ;  /* The global environment variable */
 
 /* Function to search for the command in the PATH directories */
 char *find_command_in_path(const char *command) {
