@@ -1,0 +1,29 @@
+.TH SIMPLE_SHELL 1 "February 2025" "1.0" "User Commands"
+.SH NAME
+simple_shell \- A simple UNIX command-line interpreter.
+
+.SH SYNOPSIS
+.B simple_shell
+[\fIcommand\fR]
+
+.SH DESCRIPTION
+The \fBsimple_shell\fR is a basic command-line interpreter that executes commands by searching through the system's PATH environment variable.
+
+.SH USAGE
+.TP
+Running in interactive mode:
+.B ./hsh
+.TP
+Running in non-interactive mode:
+.B echo "ls -l" | ./hsh
+
+.SH BUILT-IN COMMANDS
+.TP
+\fBexit\fR
+Exits the shell.
+.TP
+\fBenv\fR
+Displays the current environment variables.
+
+.SH AUTHOR
+Abdallah
